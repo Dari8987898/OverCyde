@@ -18,7 +18,7 @@ class __LastBuildTime():
     __LAST_BUILD_TIME = None
 
     @classmethod
-    def time(cls):
+    def time(cls) -> str:
         if cls.__LAST_BUILD_TIME is None:
             cls.__get_last_build_time()
 
@@ -96,20 +96,19 @@ DLL_NAME = "libengine.dylib"        if not os.name == 'nt' else "libengine.dll"
 GLEW_LIB = "-lGLEW"                 if not os.name == 'nt' else "-lglew32"
 GLFW_LIB = "-lglfw"                 if not os.name == 'nt' else "-lglfw3"
 OPENGL_LIB = "-framework OpenGL"    if not os.name == 'nt' else "-lopengl32"
+SPDLOG_LIB = "-lspdlog"             if not os.name == 'nt' else ""
 
 GLEW_PATH = f"{LIBS_DIR}/glew"
 GLFW_PATH = f"{LIBS_DIR}/glfw"
 GLM_PATH = f"{LIBS_DIR}/glm"
 SPDLOG_PATH = f"{LIBS_DIR}/spdlog"
 STB_PATH = f"{LIBS_DIR}/stb"
-IMGUI_PATH = f"{LIBS_DIR}/imgui"
 
-LDLIBS = f"-L{SPDLOG_PATH}/src -L{IMGUI_PATH}"
-ILIBS = f"-I{GLEW_PATH}/include -I{GLFW_PATH}/include -I{GLM_PATH} -I{SPDLOG_PATH}/include -I{STB_PATH} -I{IMGUI_PATH}"
+LDLIBS = f"-L{GLM_PATH} -L{SPDLOG_PATH}/src"
+ILIBS = f"-I{GLEW_PATH}/include -I{GLFW_PATH}/include -I{GLM_PATH} -I{SPDLOG_PATH}/include -I{STB_PATH}"
 
 DLLFLAGS = "-dynamiclib" if not os.name == 'nt' else "-shared"
-LDFLAGS= f"{GLEW_LIB} {GLFW_LIB} -lm -lpthread {OPENGL_LIB}" 
-
+LDFLAGS= f"{GLEW_LIB} {GLFW_LIB} {SPDLOG_LIB} -lm -lpthread {OPENGL_LIB}" 
 if os.name == 'nt': 
     LDFLAGS += f" -L{BIN_DIR}"
 
@@ -181,6 +180,14 @@ def game(spec : str):
 
 
 if __name__ == "__main__":
+    if not os.path.exists(f"{BUILD_DIR}/Engine"):
+        logging.error(f"Cartella {BUILD_DIR}/Engine non trovato")
+        sys.exit(0)
+        
+    if not os.path.exists(f"{BUILD_DIR}/Game"):
+        logging.error(f"Cartella {BUILD_DIR}/Game non trovato")
+        sys.exit(0)
+        
     parser = argparse.ArgumentParser()
     parser.add_argument("action", type=str, default="all", nargs="?")
     parser.add_argument("spec", type=str, default="", nargs="?")
@@ -190,4 +197,3 @@ if __name__ == "__main__":
         funs[args.action](args.spec)
     else: 
         logging.error(f"Action '{args.action}' doesn't declared")
-
