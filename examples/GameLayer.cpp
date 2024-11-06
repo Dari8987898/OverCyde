@@ -3,55 +3,50 @@
 
 using namespace std;
 using namespace Engine;
+using namespace SnakePackage;
 
-/**
- * Aggiunge una parte al corpo di snake.
- */
+/// @brief Aggiunge una parte al corpo di snake.
 void GameLayer::AddSnakeBodyPart() {
     float newBodyX;
     float newBodyY;
+    
+    if (this->snake.getBodySize() == 0) {
+        newBodyX = this->snake.getHeadDirection() == 'L' 
+            ? this->snake.getHeadX() + (this->snakeDimension[0] * 2)
+            : this->snake.getHeadDirection() == 'R' 
+                ? this->snake.getHeadX() - (this->snakeDimension[0] * 2)
+                : this->snake.getHeadX();
 
-
-    if (this->snakeBody.size() == 0) {
-        newBodyX = this->snakeCurrentDirection == 'L' 
-        ? this->snakeCurrentPositionX + (this->snakeSize[0] * 2)
-        : this->snakeCurrentDirection == 'R' 
-            ? this->snakeCurrentPositionX - (this->snakeSize[0] * 2)
-            : this->snakeCurrentPositionX;
-
-        newBodyY = this->snakeCurrentDirection == 'U' 
-            ? this->snakeCurrentPositionY - (this->snakeSize[1] * 2)
-            : this->snakeCurrentDirection == 'D' 
-                ? this->snakeCurrentPositionY + (this->snakeSize[1] * 2)
-                : this->snakeCurrentPositionY;
+        newBodyY = this->snake.getHeadDirection() == 'U' 
+            ? this->snake.getHeadY() - (this->snakeDimension[1] * 2)
+            : this->snake.getHeadDirection() == 'D' 
+                ? this->snake.getHeadY() + (this->snakeDimension[1] * 2)
+                : this->snake.getHeadY();
     } else {
-        SnakeBodyPart last = this->snakeBody[this->snakeBody.size() - 1];
+        SnakeBodyPart last = this->snake.getBodyPart(this->snake.getBodySize() - 1);
 
-        newBodyX = last.currentDirection == 'L' 
-        ? last.currentPositionX + (this->snakeSize[0] * 2)
-        : last.currentDirection == 'R' 
-            ? last.currentPositionX - (this->snakeSize[0] * 2)
-            : last.currentPositionX;
+        newBodyX = last.getDirection() == 'L' 
+            ? last.getX() + (this->snakeDimension[0] * 2)
+            : last.getDirection() == 'R' 
+                ? last.getX() - (this->snakeDimension[0] * 2)
+                : last.getX();
 
-        newBodyY = last.currentDirection == 'U' 
-            ? last.currentPositionY - (this->snakeSize[1] * 2)
-            : last.currentDirection == 'D' 
-                ? last.currentPositionY + (this->snakeSize[1] * 2)
-                : last.currentPositionY;
+        newBodyY = last.getDirection() == 'U' 
+            ? last.getY() - (this->snakeDimension[1] * 2)
+            : last.getDirection() == 'D' 
+                ? last.getY() + (this->snakeDimension[1] * 2)
+                : last.getY();
     }
     
-
-    this->snakeBody.push_back(SnakeBodyPart(newBodyX, newBodyY, this->snakeCurrentDirection));
+    this->snake.AddBodyPart(newBodyX, newBodyY, this->snake.getHeadDirection());
 }
 
-/**
- * Controlla se è avvenuta una collisione che provoca la morte.
- */
+// @brief Controlla se snake ha colliso con i bordi dello schermo.
 void GameLayer::CheckDeathCollision() {
-    const float snakeRightEdge = this->snakeCurrentPositionX + (float)(this->snakeSize[0] / 2);
-    const float snakeLeftEdge = this->snakeCurrentPositionX - (float)(this->snakeSize[0] / 2);
-    const float snakeUpEdge = this->snakeCurrentPositionY + (float)(this->snakeSize[1] / 2);
-    const float snakeDownEdge = this->snakeCurrentPositionY - (float)(this->snakeSize[1] / 2);
+    const float snakeRightEdge = this->snake.getHeadX() + (float)(this->snakeDimension[0] / 2);
+    const float snakeLeftEdge = this->snake.getHeadX() - (float)(this->snakeDimension[0] / 2);
+    const float snakeUpEdge = this->snake.getHeadY() + (float)(this->snakeDimension[1] / 2);
+    const float snakeDownEdge = this->snake.getHeadY() - (float)(this->snakeDimension[1] / 2);
 
     if (
         snakeRightEdge >= 1
@@ -60,30 +55,27 @@ void GameLayer::CheckDeathCollision() {
         || snakeDownEdge <= -1
     ) {
         LOG_CLIENT_INFO("CHE FALLITO, SEI MORTO.");
-        LOG_CLIENT_INFO("Hai mangiato {0} mele.", this->nAppleEaten);
+        LOG_CLIENT_INFO("Hai mangiato {0} mele.", this->snake.nAppleEaten);
+
         GameLayer::ResetGame();
     }
 }
 
-/**
- * Controlla se snake ha colliso con la mela.
- */
+// @brief Controlla se snake ha colliso con la mela.
 void GameLayer::CheckAppleCollision() {
-    if (this->snakeCurrentPositionX + (float)(this->snakeSize[0] / 2) < this->appleCurrentPositionX - (float)(this->appleSize / 2)) return;
-    if (this->snakeCurrentPositionX - (float)(this->snakeSize[0] / 2) > this->appleCurrentPositionX + (float)(this->appleSize / 2)) return;
-    if (this->snakeCurrentPositionY + (float)(this->snakeSize[1] / 2) < this->appleCurrentPositionY - (float)(this->appleSize / 2)) return;
-    if (this->snakeCurrentPositionY - (float)(this->snakeSize[1] / 2) > this->appleCurrentPositionY + (float)(this->appleSize / 2)) return;
+    if (this->snake.getHeadX() + (float)(this->snakeDimension[0] / 2) < this->appleCurrentPositionX - (float)(this->appleDimension / 2)) return;
+    if (this->snake.getHeadX() - (float)(this->snakeDimension[0] / 2) > this->appleCurrentPositionX + (float)(this->appleDimension / 2)) return;
+    if (this->snake.getHeadY() + (float)(this->snakeDimension[1] / 2) < this->appleCurrentPositionY - (float)(this->appleDimension / 2)) return;
+    if (this->snake.getHeadY() - (float)(this->snakeDimension[1] / 2) > this->appleCurrentPositionY + (float)(this->appleDimension / 2)) return;
     
-    this->nAppleEaten++;
+    this->snake.nAppleEaten++;
     this->appleEaten = true;
     this->appleDrawn = false;
 
     AddSnakeBodyPart();
 }
 
-/**
- * Genera una mela sullo schermo, se non è già presente.
- */
+/// @brief Genera una mela sullo schermo, se non è già presente.
 void GameLayer::DrawApple() {
     if (!this->appleDrawn) {
         this->appleDrawn = true;
@@ -100,65 +92,63 @@ void GameLayer::DrawApple() {
         this->appleCurrentPositionY = dis(gen);
     }
     
-    Renderer::Draw2DCircle(this->appleSize, Vec2f(this->appleCurrentPositionX, this->appleCurrentPositionY), this->appleColor, 0);
+    Renderer::Draw2DCircle(this->appleDimension, Vec2f(this->appleCurrentPositionX, this->appleCurrentPositionY), this->appleColor, 0);
 }
 
-/**
- * Disegna snake.
- */
-void GameLayer::DrawSnake() {
-    // Disegno la testa.
-    Renderer::Draw2DSquare(Vec2f(this->snakeCurrentPositionX, this->snakeCurrentPositionY), this->snakeSize, this->snakeColor, 0);
+void GameLayer::DrawDirectionChanges() {
+    vector<DirectionChange> directionChanges = this->snake.getDirectionChanges();
 
-    for(int i = 0; i < this->snakeBody.size(); i++) {
-        SnakeBodyPart current = this->snakeBody[i];
-        Renderer::Draw2DSquare(Vec2f(current.currentPositionX, current.currentPositionY), this->snakeSize, this->snakeColor, 0);
+    for (int i = 0; i < directionChanges.size(); i++) {
+        DirectionChange dc = directionChanges[i];
+
+        Renderer::Draw2DCircle(0.01, Vec2f(dc.x, dc.y), Vec4f(90, 90, 255, 0), 0);
     }
 }
 
-/**
- * Stabilisce quale key è stato premuto ed aggiorna la direzione di movimento di conseguenza.
- */
+/// @brief Disegna snake sullo schermo.
+void GameLayer::DrawSnake() {
+    // Disegno la testa.
+    Renderer::Draw2DSquare(Vec2f(this->snake.getHeadX(), this->snake.getHeadY()), this->snakeDimension, this->snakeColor, 0);
+
+    for(int i = 0; i < this->snake.getBodySize(); i++) {
+        SnakeBodyPart current = this->snake.getBodyPart(i);
+        Renderer::Draw2DSquare(Vec2f(current.getX(), current.getY()), this->snakeDimension, this->snakeColor, 0);
+    }
+}
+
+/// @brief Stabilisce quale key è stato premuto ed aggiorna la direzione di movimento di conseguenza.
+/// @param kpe Oggetto KeyPressedEvent.
 bool GameLayer::KeyPressed(KeyPressedEvent &kpe) {
     vector<int> indexes;
-    for(int i = 0; i < this->snakeBody.size(); i++)
+
+    for(int i = 0; i < this->snake.getBodySize(); i++)
         indexes.push_back(i);
-        
+    
     switch (kpe.GetKeyCode()) {
         case Key::W:
-            if (this->nAppleEaten < 1 || this->snakeCurrentDirection != 'D') {
-                this->snakeCurrentDirection = 'U';
+            if (this->snake.nAppleEaten < 1 || this->snake.getHeadDirection() != 'D')
+                this->snake.ChangeDirection('U');
 
-                if (this->nAppleEaten > 0)
-                    directionChanges.push_back(DirectionChange(this->snakeCurrentPositionX, this->snakeCurrentPositionY, 'U', indexes));
-            }
             break;
 
         case Key::A:
-            if (this->nAppleEaten < 1 || this->snakeCurrentDirection != 'R') {
-                this->snakeCurrentDirection = 'L';
-
-                if (this->nAppleEaten > 0)
-                    directionChanges.push_back(DirectionChange(this->snakeCurrentPositionX, this->snakeCurrentPositionY, 'L', indexes));
-            }
+            if (this->snake.nAppleEaten < 1 || this->snake.getHeadDirection() != 'R')
+                this->snake.ChangeDirection('L');
+            
             break;
 
         case Key::S:
-            if (this->nAppleEaten < 1 || this->snakeCurrentDirection != 'U') {
-                this->snakeCurrentDirection = 'D';
-
-                if (this->nAppleEaten > 0)
-                    directionChanges.push_back(DirectionChange(this->snakeCurrentPositionX, this->snakeCurrentPositionY, 'D', indexes));
-            }
+            if (this->snake.nAppleEaten < 1 || this->snake.getHeadDirection() != 'U')
+                this->snake.ChangeDirection('D');
+            
+            break;
             break;
 
         case Key::D:
-            if (this->nAppleEaten < 1 || this->snakeCurrentDirection != 'L') {
-                this->snakeCurrentDirection = 'R';
-
-                if (this->nAppleEaten > 0)
-                    directionChanges.push_back(DirectionChange(this->snakeCurrentPositionX, this->snakeCurrentPositionY, 'R', indexes));
-            }
+            if (this->snake.nAppleEaten < 1 || this->snake.getHeadDirection() != 'L')
+                this->snake.ChangeDirection('R');
+            
+            break;
                 
             break;
         
@@ -166,20 +156,13 @@ bool GameLayer::KeyPressed(KeyPressedEvent &kpe) {
             break;
     }
 
-    return false;
+    return true;
 }
 
-/**
- * Resetta il gioco e logga le statistiche del gioco concluso.
- */
+/// @brief Resetta il gioco e logga le statistiche del gioco concluso.
 void GameLayer::ResetGame() {
-    this->snakeCurrentPositionX = this->startingPosition[0];
-    this->snakeCurrentPositionY = this->startingPosition[1];
-    this->snakeCurrentDirection = this->startingDirection;
+    this->snake.Reset();
     this->appleDrawn = false;
-    this->nAppleEaten = 0;
-    this->directionChanges.clear();
-    this->snakeBody.clear();
 
     LOG_CLIENT_INFO("\n\n\n\n\n\nGioco resettato.");
 }
@@ -190,90 +173,32 @@ void GameLayer::ResetGame() {
 void GameLayer::UpdatePosition(float deltaTime) {
     const float normalizedSpeed = this->speed * deltaTime;
 
-    if (this->snakeCurrentDirection != ' ') {
-        switch (snakeCurrentDirection) {
+    float currentHeadX = this->snake.getHeadX();
+    float currentHeadY = this->snake.getHeadY();
+
+    if (this->snake.getHeadDirection() != ' ') {
+        switch (this->snake.getHeadDirection()) {
             case 'U':
-                this->snakeCurrentPositionY += normalizedSpeed;
+                currentHeadY += normalizedSpeed;
                 break;
 
             case 'L':
-                this->snakeCurrentPositionX -= normalizedSpeed;
+                currentHeadX -= normalizedSpeed;
                 break;
 
             case 'D':
-                this->snakeCurrentPositionY -= normalizedSpeed;
+                currentHeadY -= normalizedSpeed;
                 break;
 
             case 'R':
-                this->snakeCurrentPositionX += normalizedSpeed;
+                currentHeadX += normalizedSpeed;
                 break;
             
             default:
                 break;
         }
-    }
 
-    for (int i = 0; i < this->directionChanges.size(); i++) {
-        DirectionChange dc = this->directionChanges[i];
-
-        for (int j = 0; j < dc.snakeBodyIndexes.size(); j++) {
-            SnakeBodyPart currentSB = this->snakeBody[j];
-
-            bool changeDirection = false;
-        
-            switch (currentSB.currentDirection) {
-                case 'U':
-                    if (currentSB.currentPositionY >= dc.y)
-                        changeDirection = true;
-                    break;
-
-                case 'R':
-                    if (currentSB.currentPositionX >= dc.x)
-                        changeDirection = true;
-                    break;
-
-                case 'D':
-                    if (currentSB.currentPositionY <= dc.y)
-                        changeDirection = true;
-                    break;
-
-                case 'L':
-                    if (currentSB.currentPositionX <= dc.x)
-                        changeDirection = true;
-                    break;
-            }
-
-            if (changeDirection) {
-                this->snakeBody.at(j).currentDirection = dc.direction;
-                this->snakeBody.at(j).currentPositionX = dc.x;
-                this->snakeBody.at(j).currentPositionY = dc.y;
-                
-                this->directionChanges.at(i).snakeBodyIndexes.erase(this->directionChanges.at(i).snakeBodyIndexes.begin() + j);
-            }
-        }
-    }
-
-    for(int i = 0; i < this->snakeBody.size(); i++) {
-        switch (this->snakeBody.at(i).currentDirection) {
-            case 'U':
-                this->snakeBody.at(i).currentPositionY += normalizedSpeed;
-                break;
-
-            case 'L':
-                this->snakeBody.at(i).currentPositionX -= normalizedSpeed;
-                break;
-
-            case 'D':
-                this->snakeBody.at(i).currentPositionY -= normalizedSpeed;
-                break;
-
-            case 'R':
-                this->snakeBody.at(i).currentPositionX += normalizedSpeed;
-                break;
-            
-            default:
-                break;
-        }
+        this->snake.UpdatePosition(currentHeadX, currentHeadY);
     }
 }
 
@@ -285,6 +210,9 @@ void GameLayer::OnEvent(Event& event) {
 
 void GameLayer::OnUpdate(float deltaTime) {
     Renderer::BeginScene(deltaTime);
+
+    // Disegno i cambi di direzione di snake.
+    this->DrawDirectionChanges();
 
     // Disegno la mela.
     this->DrawApple();

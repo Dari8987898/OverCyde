@@ -1,15 +1,21 @@
-#include <Engine.h>
+namespace SnakePackage {
+    class SnakeBodyPart {
+        public:
+            // Costruttori
+            SnakeBodyPart(float x, float y, char direction) : x(x), y(y), direction(direction) {}
 
-using namespace Engine;
+            // Get
+            float getX() const { return x; }
+            float getY() const { return y; }
+            char getDirection() const { return direction; }
 
-class SnakeBodyPart {
-    public:
-        SnakeBodyPart(float currentPositionX, float currentPositionY, char currentDirection) {
-            this->currentPositionX = currentPositionX;
-            this->currentPositionY = currentPositionY;
-            this->currentDirection = currentDirection;
-        };
-        float currentPositionX;
-        float currentPositionY;
-        char currentDirection;
-};
+            // Metodi
+            void ChangeDirection(char direction);
+            void UpdatePosition(float x, float y);
+            
+        private:
+            float x;
+            float y;
+            char direction;
+    };
+}
