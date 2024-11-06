@@ -36,7 +36,7 @@ namespace Engine {
     }
 
     void Renderer2D::BeginScene(float deltaTime) {
-        s_CameraController.OnUpdate(deltaTime);
+        //s_CameraController.OnUpdate(deltaTime);
         s_Data.BaseShader->Bind();
         std::dynamic_pointer_cast<OpenGLShader>(s_Data.BaseShader)->SetMatrix4("u_ProjectionView", 
                                                                                 s_CameraController.GetProjectionViewMatrix());

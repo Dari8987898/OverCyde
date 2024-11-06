@@ -78,7 +78,7 @@ namespace Engine {
         }
     }
 
-    void ImGuiLayer::OnImGuiRender() {
+    void ImGuiLayer::OnImGuiRender() {/*
         static bool showDemoWindow = false;
         if (showDemoWindow)
             ImGui::ShowDemoWindow(&showDemoWindow);
@@ -122,5 +122,6 @@ namespace Engine {
             ImGui::EndTable();
             ImGui::End();
         #endif
+        */
     }
 }
