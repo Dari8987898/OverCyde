@@ -1,9 +1,9 @@
 #include "SnakeBodyPart.h"
 
 namespace SnakePackage {
-    // @brief Cambia la direzione di movimento dei questa parte del corpo di snake.
-    // @param direction Direzione. U - up, D - down, L - left, R - right
-    void SnakeBodyPart::ChangeDirection(char direction) {
+    /// @brief Cambia la direzione di movimento dei questa parte del corpo di snake.
+    /// @param direction Direzione di movimento.
+    void SnakeBodyPart::ChangeDirection(MovementDirection direction) {
         this->direction = direction;
     }
 

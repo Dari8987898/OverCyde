@@ -4,6 +4,7 @@
 using namespace std;
 using namespace Engine;
 using namespace SnakePackage;
+using namespace SnakePackageUtil;
 
 /// @brief Aggiunge una parte al corpo di snake.
 void GameLayer::AddSnakeBodyPart() {
@@ -11,37 +12,65 @@ void GameLayer::AddSnakeBodyPart() {
     float newBodyY;
     
     if (this->snake.getBodySize() == 0) {
-        newBodyX = this->snake.getHeadDirection() == 'L' 
-            ? this->snake.getHeadX() + (this->snakeDimension[0] * 2)
-            : this->snake.getHeadDirection() == 'R' 
-                ? this->snake.getHeadX() - (this->snakeDimension[0] * 2)
-                : this->snake.getHeadX();
+        switch (this->snake.getHeadDirection()) {
+            case MovementDirection::LEFT:
+                newBodyX = this->snake.getHeadX() + (this->snakeDimension[0] * 2);
+                newBodyY = this->snake.getHeadY();
+                break;
 
-        newBodyY = this->snake.getHeadDirection() == 'U' 
-            ? this->snake.getHeadY() - (this->snakeDimension[1] * 2)
-            : this->snake.getHeadDirection() == 'D' 
-                ? this->snake.getHeadY() + (this->snakeDimension[1] * 2)
-                : this->snake.getHeadY();
+            case MovementDirection::RIGHT:
+                newBodyX = this->snake.getHeadX() - (this->snakeDimension[0] * 2);
+                newBodyY = this->snake.getHeadY();
+                break;
+
+            case MovementDirection::UP:
+                newBodyX = this->snake.getHeadX();
+                newBodyY = this->snake.getHeadY() - (this->snakeDimension[1] * 2);
+                break;
+
+            case MovementDirection::DOWN:
+                newBodyX = this->snake.getHeadX();
+                newBodyY = this->snake.getHeadY() + (this->snakeDimension[1] * 2);
+                break;
+
+            default:
+                return;
+        }
+
+        this->snake.AddBodyPart(newBodyX, newBodyY, this->snake.getHeadDirection());
     } else {
         SnakeBodyPart last = this->snake.getBodyPart(this->snake.getBodySize() - 1);
+        
+        switch (last.getDirection()) {
+            case MovementDirection::LEFT:
+                newBodyX = last.getX() + (this->snakeDimension[0] * 2);
+                newBodyY = last.getY();
+                break;
 
-        newBodyX = last.getDirection() == 'L' 
-            ? last.getX() + (this->snakeDimension[0] * 2)
-            : last.getDirection() == 'R' 
-                ? last.getX() - (this->snakeDimension[0] * 2)
-                : last.getX();
+            case MovementDirection::RIGHT:
+                newBodyX = last.getX() - (this->snakeDimension[0] * 2);
+                newBodyY = last.getY();
+                break;
 
-        newBodyY = last.getDirection() == 'U' 
-            ? last.getY() - (this->snakeDimension[1] * 2)
-            : last.getDirection() == 'D' 
-                ? last.getY() + (this->snakeDimension[1] * 2)
-                : last.getY();
+            case MovementDirection::UP:
+                newBodyX = last.getX();
+                newBodyY = last.getY() - (this->snakeDimension[1] * 2);
+                break;
+
+            case MovementDirection::DOWN:
+                newBodyX = last.getX();
+                newBodyY = last.getY() + (this->snakeDimension[1] * 2);
+                break;
+
+            default:
+                return;
+        }
+
+        this->snake.AddBodyPart(newBodyX, newBodyY, last.getDirection());
     }
-    
-    this->snake.AddBodyPart(newBodyX, newBodyY, this->snake.getHeadDirection());
 }
 
-// @brief Controlla se snake ha colliso con i bordi dello schermo.
+/// @brief Controlla se snake ha colliso con i bordi dello schermo.
 void GameLayer::CheckDeathCollision() {
     const float snakeRightEdge = this->snake.getHeadX() + (float)(this->snakeDimension[0] / 2);
     const float snakeLeftEdge = this->snake.getHeadX() - (float)(this->snakeDimension[0] / 2);
@@ -54,6 +83,7 @@ void GameLayer::CheckDeathCollision() {
         || snakeUpEdge >= 1
         || snakeDownEdge <= -1
     ) {
+        LOG_CLIENT_INFO(' ');
         LOG_CLIENT_INFO("CHE FALLITO, SEI MORTO.");
         LOG_CLIENT_INFO("Hai mangiato {0} mele.", this->snake.nAppleEaten);
 
@@ -61,7 +91,7 @@ void GameLayer::CheckDeathCollision() {
     }
 }
 
-// @brief Controlla se snake ha colliso con la mela.
+/// @brief Controlla se snake ha colliso con la mela.
 void GameLayer::CheckAppleCollision() {
     if (this->snake.getHeadX() + (float)(this->snakeDimension[0] / 2) < this->appleCurrentPositionX - (float)(this->appleDimension / 2)) return;
     if (this->snake.getHeadX() - (float)(this->snakeDimension[0] / 2) > this->appleCurrentPositionX + (float)(this->appleDimension / 2)) return;
@@ -95,6 +125,7 @@ void GameLayer::DrawApple() {
     Renderer::Draw2DCircle(this->appleDimension, Vec2f(this->appleCurrentPositionX, this->appleCurrentPositionY), this->appleColor, 0);
 }
 
+/// @brief Disegna i cambi di direzione di snake sullo schermo.
 void GameLayer::DrawDirectionChanges() {
     vector<DirectionChange> directionChanges = this->snake.getDirectionChanges();
 
@@ -127,29 +158,27 @@ bool GameLayer::KeyPressed(KeyPressedEvent &kpe) {
     switch (kpe.GetKeyCode()) {
         case Key::W:
             if (this->snake.nAppleEaten < 1 || this->snake.getHeadDirection() != 'D')
-                this->snake.ChangeDirection('U');
+                this->snake.ChangeDirection(MovementDirection::UP);
 
             break;
 
         case Key::A:
             if (this->snake.nAppleEaten < 1 || this->snake.getHeadDirection() != 'R')
-                this->snake.ChangeDirection('L');
+                this->snake.ChangeDirection(MovementDirection::LEFT);
             
             break;
 
         case Key::S:
             if (this->snake.nAppleEaten < 1 || this->snake.getHeadDirection() != 'U')
-                this->snake.ChangeDirection('D');
+                this->snake.ChangeDirection(MovementDirection::DOWN);
             
             break;
             break;
 
         case Key::D:
             if (this->snake.nAppleEaten < 1 || this->snake.getHeadDirection() != 'L')
-                this->snake.ChangeDirection('R');
+                this->snake.ChangeDirection(MovementDirection::RIGHT);
             
-            break;
-                
             break;
         
         default:
@@ -159,47 +188,19 @@ bool GameLayer::KeyPressed(KeyPressedEvent &kpe) {
     return true;
 }
 
-/// @brief Resetta il gioco e logga le statistiche del gioco concluso.
+/// @brief Resetta il gioco e logga le statistiche.
 void GameLayer::ResetGame() {
     this->snake.Reset();
     this->appleDrawn = false;
 
-    LOG_CLIENT_INFO("\n\n\n\n\n\nGioco resettato.");
+    LOG_CLIENT_INFO("Gioco resettato.");
 }
 
-/**
- * Aggiorna la posizione in base alla direzione corrente.
- */
+/// @brief Aggiorna la posizione di snake.
 void GameLayer::UpdatePosition(float deltaTime) {
     const float normalizedSpeed = this->speed * deltaTime;
 
-    float currentHeadX = this->snake.getHeadX();
-    float currentHeadY = this->snake.getHeadY();
-
-    if (this->snake.getHeadDirection() != ' ') {
-        switch (this->snake.getHeadDirection()) {
-            case 'U':
-                currentHeadY += normalizedSpeed;
-                break;
-
-            case 'L':
-                currentHeadX -= normalizedSpeed;
-                break;
-
-            case 'D':
-                currentHeadY -= normalizedSpeed;
-                break;
-
-            case 'R':
-                currentHeadX += normalizedSpeed;
-                break;
-            
-            default:
-                break;
-        }
-
-        this->snake.UpdatePosition(currentHeadX, currentHeadY);
-    }
+    this->snake.UpdatePosition(normalizedSpeed);
 }
 
 void GameLayer::OnEvent(Event& event) {

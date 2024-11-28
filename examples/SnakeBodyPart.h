@@ -1,21 +1,25 @@
+#include "Util.h"
+
+using namespace SnakePackageUtil;
+
 namespace SnakePackage {
     class SnakeBodyPart {
         public:
             // Costruttori
-            SnakeBodyPart(float x, float y, char direction) : x(x), y(y), direction(direction) {}
+            SnakeBodyPart(float x, float y, MovementDirection direction) : x(x), y(y), direction(direction) {}
 
             // Get
             float getX() const { return x; }
             float getY() const { return y; }
-            char getDirection() const { return direction; }
+            MovementDirection getDirection() const { return direction; }
 
             // Metodi
-            void ChangeDirection(char direction);
+            void ChangeDirection(MovementDirection direction);
             void UpdatePosition(float x, float y);
             
         private:
             float x;
             float y;
-            char direction;
+            MovementDirection direction;
     };
 }
